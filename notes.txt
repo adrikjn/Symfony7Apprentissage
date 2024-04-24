@@ -1,0 +1,23 @@
+Installer le projet et les préréquis : 
+composer create-project symfony/skeleton:"7.0.*" my_project_directory
+cd my_project_directory
+composer require webapp
+
+Voir l'ensemble des opérations sur symfony
+php bin/console 
+
+Démarrer le serveur interne de php
+php -S localhost:8000 -t public
+
+****************************************************************************
+
+Ensemble de commande make :
+php bin/console make
+
+Créer un controller : 
+php bin/console make:controller NomDuController
+
+On met ensuite la route qui pointe sur le / en changeant le name si on le souhaite
+
+Pour retrouver toutes ces routes :
+php bin/console debug:router
