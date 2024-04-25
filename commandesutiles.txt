@@ -1,0 +1,8 @@
+Voir l'ensemble des opérations sur symfony
+php bin/console 
+
+Ensemble de commande make :
+php bin/console make
+
+Pour retrouver toutes ces routes :
+php bin/console debug:router
