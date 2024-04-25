@@ -1,4 +1,7 @@
+****************************************************************************
+
 Installer le projet et les préréquis : 
+
 composer create-project symfony/skeleton:"7.0.*" my_project_directory
 cd my_project_directory
 composer require webapp
@@ -8,10 +11,56 @@ php -S localhost:8000 -t public
 
 ****************************************************************************
 
-Créer un controller  (Fichier twig & Controller généré): 
+Créer un controller (Fichier twig & Controller généré): 
 php bin/console make:controller NomDuController
 
 On met ensuite la route qui pointe sur le / en changeant le name si on le souhaite
 Dans le base.html.twig on met le code qui sera présent sur toute les pages (exemple header/footer - Utilisation de bootstrap (cdn).. JS/CSS..)
 Le controller grâce au render permettra de gérer la route on peut inclure des variables afin de rendre le site dynamique et nous pouvons les afficher à l'aide de {{  }}
 Pour gérer les routes nous allons utiliser path() qui va inclure le nom de la route, d'autre paramètres peuvent être inclus comme l'id le slug etc.. dans le path
+
+****************************************************************************
+
+Création base de données & entités
+
+Dans le fichier .env on va utiliser mysql on commente donc l'autre ligne et on va décommenter mysql.
+On va changer les informations comme ceci : DATABASE_URL="mysql://root@127.0.0.1:3306/symfony7apprentissage"
+Puis nous allons faire la commande :
+
+php bin/console d:d:c pour créer la base de donnée de notre projet
+
+On peut par la suite créer les entités a l'aide de la commande : 
+
+php bin/console make:entity  - entré
+Choisir le nom de l'entité
+Symfony UX Turbo = Enter sur non
+nom de la propriété et son type (Exemple : title - string / createdAt - dateImmutable)
+field lenght est le nb maximal de caractère stockable pour le champs
+Nullable ? Non car chaque recette doit avoir un nom
+
+SUCCESS
+
+Deux fichiers on été créer dans le dossier Entité et Repository
+L'entité contient chacun des propriétés et ses différents getter et setter que l'on utilisera.
+Le repositery contiendra toute les méthodes afin de communiquer avec la BDD pour récupérer des informations par exemple.
+
+
+Nous pouvons faire la commande ci dessous pour créer le fichier de migration (Requête SQL permettant de créer les tables):
+
+php bin/console make:migration 
+
+Puis on exécuter le fichier de migration dans la BDD à l'aide de la commande :
+
+php bin/console d:m:m
+Yes
+
+SUCCESS
+
+Pour récupérer des informations depuis la BDD nous allons utliser le repositery (exemple :  $recipes = $repository->findAll();) dans notre controller tout en envoyant la variable dans le render et nous pouvons par la suite afficher les recettes en faisant une boucle dans le fichie twig de cette manière : 
+
+    {% for recipe in recipes %}
+		<li><a href="{{ path('recipe.show', {id: recipe.id, slug: recipe.slug})}}">{{ recipe.title }}</a></li>
+	{% endfor %}
+
+Nous pouvons aussi construire des requêtes plus compliqué dans le Repository à l'aide du queryBuilder si l'on veut es informations plus difficile a obtenir comme :
+Duration - de 10 minutes seulement

@@ -6,3 +6,4 @@ php bin/console make
 
 Pour retrouver toutes ces routes :
 php bin/console debug:router
+
