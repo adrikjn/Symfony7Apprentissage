@@ -113,3 +113,17 @@ On doit mettre la methode delete dans la route et dans le fichier twig nous devo
 				</form>
 
 On peut aussi créer des eventlistener par exemple si slug vide il prend le nom du title MËME SI le champ n'est pas NULLABLE !!
+
+****************************************************************************
+
+Valider les données 
+
+On peut le faire dans le fichier type ou dans l'entité directement
+Sequentially permet d'afficher les erreurs 1 par 1 (meilleur pour le STYLE) afin d'éviter le spam on corrige d'abord une erreure et la second peut apparaitre par la suite.
+->add('slug', TextType::class, [
+                'required' => false,
+            ])
+
+Pour faire des banword :
+php bin/console make:validator /  BanWordValidator
+Il faudra placer avant la propriété de l'entité ceci : #[BanWord()] et faire les modifications des deux fichiers (regarder)
