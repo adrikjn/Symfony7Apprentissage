@@ -127,3 +127,34 @@ Sequentially permet d'afficher les erreurs 1 par 1 (meilleur pour le STYLE) afin
 Pour faire des banword :
 php bin/console make:validator /  BanWordValidator
 Il faudra placer avant la propriété de l'entité ceci : #[BanWord()] et faire les modifications des deux fichiers (regarder)
+
+
+****************************************************************************
+
+GERER UN MAILER DE DEV TP UTILISE !!
+TP : Formulaire de Contact
+Allez dans le fichier messenger.yaml (config package) (par défaut ils sont envoyé avec messenger)
+
+On décommente : sync: 'sync://'
+On transforme les 3 routing en sync :
+routing:
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
+            Symfony\Component\Notifier\Message\ChatMessage: sync
+            Symfony\Component\Notifier\Message\SmsMessage: sync
+
+.env partie mailer changer sur :  MAILER_DSN=smtp://localhost:1025
+ON Télécharge mailpit on le met dans le fichier bin après l'avoir extrait et on peu le lancer, on peut aller sur  http://localhost:8025/
+
+Créer dossier DTO puis fichier ContactDTO.php à l'intérieur on créer les propriétés comme la manière des entités avec les contraintes de valiation, on gère le contacttype
+
+Ensuite on peut php bin/console make:form ContactType
+Puis \App\DTO\ContactDTO
+
+Typé car ce ne sont pas des champs d'entité 
+            ->add('name', TextType::class)
+            ->add('email', EmailType::class)
+            ->add('message', TextareaType::class)
+
+On peut faire un :
+php bin/console make:controller ContactController et construire le mail on peut créer un template afin de styliser le mail
+
