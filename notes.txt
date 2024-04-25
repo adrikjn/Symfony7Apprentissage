@@ -64,3 +64,52 @@ Pour récupérer des informations depuis la BDD nous allons utliser le repositer
 
 Nous pouvons aussi construire des requêtes plus compliqué dans le Repository à l'aide du queryBuilder si l'on veut es informations plus difficile a obtenir comme :
 Duration - de 10 minutes seulement
+
+****************************************************************************
+
+Créer un formulaire pour une entité :
+
+php bin/console make:form
+NomType
+Bound : Yes
+
+Automatiquement un fichier RecipeType dans le dossierform va être créer contenant les champs de l'entités
+
+Afin d'appliquer le style de bootstrap sur les formulaires il faut se rendre dans config puis packages puis twig.yaml et placer :
+twig:
+    file_name_pattern: '*.twig'
+    form_themes: ['bootstrap_5_layout.html.twig']
+
+Dans le controller il faudra construire une requête permettant de traiter le formulaire a l'aide du handleRequest puis flush..
+Le edit va récupérer dans le form les informations de la recette sous forme de formulaire et il faudra ainsi faire quelque modifications dans le recipetype ou il faudra retirer les données dynamiques (createdAt par exemple.) On peut rajouter des label a partir du recipe type des buttons etc mais je préfère faire ceci a partir du fichier twig edit.
+Dans le fichier twig il faudra faire un form_start(nom de la variable) puis lister tout les champs que l'on souhaite mettre de la manière : {{form_row(form.title)}} dans le formulaire puis un button pour le formulaire puis refermer avec un form_end(nom de la variable). Ainsi l'edit marchera convenablement.
+
+
+Affcher un message flash suite au Edit qui sera effacé lorsqu'on refresh la page.
+
+Message flash : Dans le controller avant le redirect on place par exemple : 
+         $this->addFlash('success', 'La recette a bien été modifiée');
+on include dans le body.html.twig	:	{% include "partials/flash.html.twig" %}
+On créer un dossier partials et un ficher flash.html.twig on fait une boucle selon le type : 
+{% for type, messages in app.flashes %}
+    <div class="alert alert-{{ type }}">
+        {{  messages | join('. ')}}
+    </div>
+{% endfor %}
+
+Pour le create ça marche presque de la même manièe cependant on doit set les valeurs dans la fonction relatif au datetime et on doit créer un objet vide afin de rentrer de nouvelles données ($recipe = new Recipe();) On persist on flush et les données sont envoyé en BDD
+
+Pour autoriser le delete on va dans config puis packages puis framework.yaml
+on ajoute la dernirèe ligne en dessous de fragment
+    #esi: true
+    #fragments: true
+    http_method_override: true
+
+On doit mettre la methode delete dans la route et dans le fichier twig nous devons faire ceci pour simuler un delete
+
+                <form action="{{path('recipe.delete', {id: recipe.id})}}" method="post">
+				<input type="hidden" name="_method" value="DELETE">
+					<button type="submit" class="btn btn-danger btn-sm" >Supprimer</button>
+				</form>
+
+On peut aussi créer des eventlistener par exemple si slug vide il prend le nom du title MËME SI le champ n'est pas NULLABLE !!
