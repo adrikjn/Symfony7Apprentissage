@@ -12,4 +12,6 @@ Créer un controller  (Fichier twig & Controller généré):
 php bin/console make:controller NomDuController
 
 On met ensuite la route qui pointe sur le / en changeant le name si on le souhaite
-
+Dans le base.html.twig on met le code qui sera présent sur toute les pages (exemple header/footer - Utilisation de bootstrap (cdn).. JS/CSS..)
+Le controller grâce au render permettra de gérer la route on peut inclure des variables afin de rendre le site dynamique et nous pouvons les afficher à l'aide de {{  }}
+Pour gérer les routes nous allons utiliser path() qui va inclure le nom de la route, d'autre paramètres peuvent être inclus comme l'id le slug etc.. dans le path
