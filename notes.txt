@@ -258,4 +258,75 @@ En mettant dans l'entité Category ceci cascade:
 
 On peut permettre lors de la supression du category, la supression de la recette qui est lié grâce a l'id category stocké dans la recette
 
+****************************************************************************
 
+Envoi de fichiers
+
+Tout d'abord on a entré un nouveau champ dans la bdd thumbnail,
+dans le RecipeType on a ajouté un champ ->add('thumbnailFile', FileType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new Image()
+                ]
+            ])
+Attention Il ne s'agit pas du champ de la bdd 
+
+Dans le controller on :
+ /** @var UploadedFile $file */
+         $file = $form->get('thumbnailFile')->getData();
+         $filename=$recipe->getId() . '.' . $file->getClientOriginalExtension();
+         $file->move('???',$filename);
+         $recipe->setThumbnail($filename);
+
+Afin de remplacer les ? qu'il y'a dans le move il faut obtenir le chemin,
+on doit donc faire la commande 
+php bin/console debug:container --parameters 
+On regarde le kernel project dir qui va donner la route 
+kernel.project_dir
+C:\Users\adrie\OneDrive\Bureau\Symfony7Apprentissage  
+
+$file->move($this->getParameter('kernel.project_dir') . '/public/recettes/images',$filename);
+
+En mettant ceci même si nous n'avons pas le dossier recettes/images il va se créer auomatiquement.
+On peut voir que le dossier a bien été créer dans public
+
+Pour l'afficher dans le twig il suffira juste de mettre : 
+        <img src="/recettes/images/{{recipe.thumbnail}}" alt="">
+
+ON PEUT AUSSI (CONSEILLER)
+
+On va utiliser un bundle de symfony pour gérer les images.
+composer require vich/uploader-bundle 
+Des fichiers vont être générées
+dans le vich_uploader.yaml changer les données comme ceci : 
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+       recipes:
+           uri_prefix: /images/recipes
+           upload_destination: '%kernel.project_dir%/public/images/recipes'
+           namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+Puis se rendre dans son entité
+Créer une nouvelle propriété, mettre les getter et setter, mettre 
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Vich\UploaderBundle\Entity\File;
+#[Vich\Uploadable()]
+#[Vich\UploadableField(mapping: 'recipes', fileNameProperty: 'thumbnail')]
+    private ?File $thumbnailFile = null;
+    public function getThumbnailFile(): ?File
+    {
+        return $this->thumbnailFile;
+    }
+
+    public function setThumbnailFile(?File $thumbnailFile): static
+    {
+        $this->thumbnailFile = $thumbnailFile;
+        return $this;
+    }
+Le fait d'utiliser ce composant permet de gérer la partie delete/remplacement beaucoup plus facilement sans logique intégrée. 
+
+Afin d'upload mainetenant l'image avec ce bundle il faut faire ceci : 
+    <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}" alt="">
+
+Je préfère la partie logique personnellement que le bundle (regarder projet symfony 6)
