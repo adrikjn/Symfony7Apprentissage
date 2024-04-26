@@ -183,3 +183,52 @@ on va dupliquer le fichier base car celui de l'admin et celui du front le base e
 On va changer les routes pour l'admin et changer le extend de chacune des pages admin
 
 
+****************************************************************************
+
+Créer les catégories
+On a créer le controller à la MAIN et créer les routes :
+<?php
+
+namespace App\Controller\Admin;
+
+use Symfony\Component\Routing\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Requirement\Requirement;
+
+#[Route("/admin/category", name: "admin.category.")]
+class CategoryController extends AbstractController
+{
+    #[Route(name: "index")]
+    public function index()
+    {
+    }
+
+    #[Route("/create", name: "create")]
+    public function create()
+    {
+    }
+
+    #[Route("/{id}", name: "edit", requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
+    public function edit()
+    {
+    }
+
+    #[Route("/{id}", name: "delete", requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
+    public function remove()
+    {
+    }
+}
+
+Nous pouvons créer l'entitié 
+php bin/console make:entity Category
+On rempli les champs et on peut pour créer le fichier de migration et l'envoyer à la bdd :
+php bin/console make:migration
+php bin/console d:m:m
+
+On va en même temps lui demander de générer le formulaire de category
+php bin/console make:form CategoryType 
+Bound a Category
+
+
+
+
