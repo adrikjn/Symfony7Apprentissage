@@ -156,5 +156,30 @@ Typé car ce ne sont pas des champs d'entité
             ->add('message', TextareaType::class)
 
 On peut faire un :
-php bin/console make:controller ContactController et construire le mail on peut créer un template afin de styliser le mail
+php bin/console make:controller ContactController et construire le mail on peut créer un template afin de styliser le mailer
+
+****************************************************************************
+
+Rendre ce CRUD dans la partie admin 
+
+Création 'un dossier Admin dans le controller et on déplace toute la partie admin dedans, tout en changeant le namespace du controller
+
+Ajouter une route au dessus de la class afin de rajouter le préfix admin de l'url :
+
+#[Route('/admin/recettes', name: 'admin.recipe.')]
+class RecipeController extends AbstractController
+
+On change les routes maintenant de chaque function du controller :
+   #[Route('/create', name: 'create')]
+   #[Route('/{id}', name: 'edit', methods:['GET', 'POST'], requirements:['id' => Requirement::DIGITS])]
+   #[Route('/{id}', name: 'delete', methods:['DELETE'], requirements:['id' => Requirement::DIGITS])]
+   #[Route('/', name: 'index')]  
+   Il faut aussi changer les redirect car les names on été changé on va créer un dossier admin au racinedu twig aussi et changer le link
+   Changer les routes des twig aussi du coup
+
+Maintenant qu'on a changé les routes 
+
+on va dupliquer le fichier base car celui de l'admin et celui du front le base est différent (exemple bar nav footer).
+On va changer les routes pour l'admin et changer le extend de chacune des pages admin
+
 
