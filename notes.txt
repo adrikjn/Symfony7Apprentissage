@@ -229,6 +229,33 @@ On va en même temps lui demander de générer le formulaire de category
 php bin/console make:form CategoryType 
 Bound a Category
 
+****************************************************************************
 
+Relation Many to One entre Recipe & Category
+
+php bin/console make:entity Recipe 
+On nomme le champ category (car on est dans l'entité recipe)
+relation Many To One
+Lié au : Category
+Nullable : oui
+Ajouer une propriéta a category : oui 
+oui
+php bin/console make:migration 
+php bin/console d:m:m
+
+Il faut ajouter le champ avec une EntityType::class dans le RecipeType afin d'être apte lors de la création ou la modification d'une recette de mettre une catégorie
+
+      ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => 'name' ,
+            ])
+
+On fait pareil dans l'autre Type
+
+En mettant dans l'entité Category ceci cascade:
+#[ORM\OneToMany(targetEntity: Recipe::class, mappedBy: 'category', cascade: ['remove'])]
+    private Collection $recipes;
+
+On peut permettre lors de la supression du category, la supression de la recette qui est lié grâce a l'id category stocké dans la recette
 
 
