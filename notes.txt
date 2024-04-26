@@ -330,3 +330,105 @@ Afin d'upload mainetenant l'image avec ce bundle il faut faire ceci :
     <img src="{{ vich_uploader_asset(recipe, 'thumbnailFile') }}" alt="">
 
 Je préfère la partie logique personnellement que le bundle (regarder projet symfony 6)
+
+**************************************************************************
+
+LE COMPOSANT SECURITE
+
+Créer l'entité User 
+php bin/console make:user
+entré
+oui
+username
+oui hash
+
+Mettre en place le système d'authentification
+php bin/console make:auth
+Login form authenticator
+AppAuthenticator
+SecurityController
+yes generate logout
+remember me yes
+0
+
+Ajouter le champ email dans l'entité user 
+php bin/console make:entity User
+make migration / dmm
+
+On peut créer le 1er utilisateur avec ceci dans un controller puis supprimé : 
+      // $user = new User();
+        // $user->setEmail('john@doe.fr')
+        //     ->setUsername('JohnDoe')
+        //     ->setPassword('0000')
+        //     ->setPassword($hasher->hashPassword($user, '0000'))
+        //     ->setRoles([]);
+        // $em->persist($user);
+        // $em->flush();
+
+Effacer la partie throw except et décommenter  dans l'app authenticator et mettre Suite à la connexion :
+        return new RedirectResponse('/');
+        *return new RedirectResponse($this->urlGenerator->generate('admin.recipe.index'));*
+
+On peut personnaliser afin d'accepter l'email et l'username pour le login
+On se rend de le app authenticator
+Et on place le repo dans le construct :
+ public function __construct(private UrlGeneratorInterface $urlGenerator, private UserRepository $userRepository)
+    {
+    }
+Ensuite on se rend dans le repo user afin de construire un queryBuilder
+
+public function findUserByEmailOrUsername(string $usernameOrEmail): ?User {
+        return $this->createQueryBuilder('u')
+        ->where('u.email = :identifier')
+        ->orWhere('u.username = :identifier')
+        ->setParameter('identifier', $usernameOrEmail)
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getSingleResult();
+    }
+
+et dans l'app authenticator on rajoute au moment du return passport:
+return new Passport(
+            new UserBadge($username, fn (string $identifier) => $this->userRepository->findUserByEmailOrUsername($identifier)),
+
+Je peux mettre sois tout en haut du controller : 
+#[IsGranted('ROLE_USER')]
+Ainsi toute les page de ce controller devront contenir le role_user pour accéder (envoyé sur la page login)
+Sinon je peux aussi mettre en haut de chaque route function pour différer
+
+Au niveau de mon get role  je vais placer une condition permettant de placer le 1er admin 
+public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        if($this->email === 'john@doe.fr') {
+            $roles[] = 'ROLE_ADMIN';
+        }
+        
+        return array_unique($roles);
+    }
+et je peux modifier le isGranted dans mon controller en ROLE_ADMIN :
+
+#[Route('/admin/recettes', name: 'admin.recipe.')]
+#[IsGranted('ROLE_ADMIN')]
+class RecipeController extends AbstractController
+
+Formulaire d'inscription utilisateur : 
+
+php bin/console make:registration-form
+Yes unique
+Yes email (composer require symfonycasts/verify-email-bundle)
+no il devra taper son compte après s'être inscrit
+email : support@demo.fr
+Support comme nom 
+Yes se connecter automatiquement après l'inscription
+
+composer require symfonycasts/verify-email-bundle
+
+Vu qu'on a demandé le truc d'email verify on doit faire un make migration et un dmm
+
+Vu qu'on accepte nom de compte et email on doit rajouter ceci sur l'entité #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')] en dessous du username mais aussi rajouter le champ email dans le RegistrationFormType
+
+Commenter toute la partie mailer dans le registrationcontroller
