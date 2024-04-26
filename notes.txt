@@ -432,3 +432,51 @@ Vu qu'on a demandé le truc d'email verify on doit faire un make migration et un
 Vu qu'on accepte nom de compte et email on doit rajouter ceci sur l'entité #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')] en dessous du username mais aussi rajouter le champ email dans le RegistrationFormType
 
 Commenter toute la partie mailer dans le registrationcontroller
+
+**************************************************************************
+
+Gérer la pagination avec deux méthodes (Doctrines & Bundles)
+
+Doctrine :
+
+Tout d'abord créer dans le repo recipe une function pour paginator 
+public function paginateRecipes(int $page, int $limit): Paginator
+    {
+        return new Paginator(
+            $this
+                ->createQueryBuilder('r')
+                ->setFirstResult(($page - 1) * $limit)
+                ->setMaxResults($limit)
+                ->getQuery()
+                ->setHint(Paginator::HINT_ENABLE_DISTINCT, false), false
+        );
+    }
+
+dans le controller nous faisons la logique 
+
+  public function index(RecipeRepository $repository, Request $request): Response
+   {
+      // $recipes = $repository->findWithDurationLowerThan(20);
+      $page = $request->query->getInt('page', 1);
+      $limit = 1;
+      $recipes = $repository->paginateRecipes($page, $limit);
+      $maxPage = ceil($recipes->count() / $limit);
+      return $this->render('admin/recipe/index.html.twig', [
+         'recipes' => $recipes,
+         'maxPage' => $maxPage,
+         'page' => $page
+      ]);
+   }
+
+   et dans la vue on affiche selon la limit 
+   	<div class="d-flex">
+		{% if page > 1 %}
+			<a class="btn btn-secondary"href="{{ path('admin.recipe.index', {page: page - 1})}}">Page précédente</a>
+		{% endif %}
+		{% if page < maxPage %}
+			<a class="btn btn-secondary"href="{{ path('admin.recipe.index', {page: page + 1})}}">Page suivante</a>
+		{% endif %}
+	</div>
+
+Bundle maintenant : 
+
