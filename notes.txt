@@ -478,5 +478,52 @@ dans le controller nous faisons la logique
 		{% endif %}
 	</div>
 
-Bundle maintenant : 
+Bundle maintenant : knp paginaor bundle
 
+composer require knplabs/knp-paginator-bundle
+Ajouter dans le repository dans l'indépendance le knp  
+use Knp\Component\Pager\PaginatorInterface;
+public function __construct(ManagerRegistry $registry, private PaginatorInterface $paginator)
+
+Ceci est la requête du repo 
+public function paginateRecipes(int $page):PaginationInterface //Paginator
+    {
+        return $this->paginator->paginate(
+            $this->createQueryBuilder('r'),
+            $page,
+            20
+        );
+    }
+Le controller va ressembler a ceci sans le code précédent : 
+
+#[Route('/', name: 'index')]
+   public function index(RecipeRepository $repository, Request $request): Response
+   {
+      $page = $request->query->getInt('page', 1);
+      $limit = 1;
+      $recipes = $repository->paginateRecipes($page);
+      return $this->render('admin/recipe/index.html.twig', [
+         'recipes' => $recipes,
+      ]);
+   }
+Et dans le fichier twig il suffit juste de 
+	{{ knp_pagination_render(recipes) }}
+pour afficher 
+
+Cependant on doit attribuer un style.
+On créer un fichier knp_paginator.yaml 
+et on copie colle le template de base qu'on peut récupérer ici : https://github.com/KnpLabs/KnpPaginatorBundle
+Cependant il y'a des données à changer comme :
+        pagination: '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig'     # sliding pagination controls template
+        sortable: '@KnpPaginator/Pagination/bootstrap_v5_bi_sortable_link.html.twig' # sort link template
+        filtration: '@KnpPaginator/Pagination/bootstrap_v5_filtration.html.twig'  # filters template
+Car on utilise bootstrap 5. Ceci peut evoluer en fonction des versions. Le style est maintenant meilleur grâce a bootstrap.
+
+On peeut aussi faire du tri a partir des titres 
+à l'aide du bundle il suffit juste de mettre ce genre de ligne il va utiliser ce qu'on a fait dans le repository 
+            <th>{{ knp_pagination_sortable(recipes, 'ID', 'r.id')}}</th>
+			<th>{{ knp_pagination_sortable(recipes, 'Titre', 'r.title')}}</th>
+Pour finir pour améliorer la sécurité dans le repo on ajoue sur les champs  [
+                'distinct' => true,
+                'sortFieldAllowList' => ['r.id', 'r.title']
+            ]

@@ -6,7 +6,8 @@ use App\Entity\Recipe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Request;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @extends ServiceEntityRepository<Recipe>
@@ -18,14 +19,24 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RecipeRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private PaginatorInterface $paginator)
     {
         parent::__construct($registry, Recipe::class);
     }
 
 
-    public function paginateRecipes(int $page, int $limit): Paginator
+    public function paginateRecipes(int $page):PaginationInterface //Paginator
     {
+        return $this->paginator->paginate(
+            $this->createQueryBuilder('r'),
+            $page,
+            2,
+            [
+                'distinct' => true,
+                'sortFieldAllowList' => ['r.id', 'r.title']
+            ]
+        );
+        /*
         return new Paginator(
             $this
                 ->createQueryBuilder('r')
@@ -34,6 +45,7 @@ class RecipeRepository extends ServiceEntityRepository
                 ->getQuery()
                 ->setHint(Paginator::HINT_ENABLE_DISTINCT, false), false
         );
+        */
     }
 
 
