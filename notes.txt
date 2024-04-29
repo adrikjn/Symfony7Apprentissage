@@ -724,3 +724,11 @@ Passons au package pour cacher le password ou l'afficher sans js :
 composer require symfony/ux-toggle-password
 Il y'a juste a ajouter : 
 'toggle' => true, dans le registrationformtype en dessous de mapped false
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED FORMULAIRE IMBRIQUE 1 VIDEO A VOIR PLUS TARD 
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED TACHE ASYNCHRONE AVEC MESSENGER 1 VIDEO A VOIR PLUS TARD
