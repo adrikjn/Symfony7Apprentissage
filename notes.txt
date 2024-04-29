@@ -527,3 +527,47 @@ Pour finir pour améliorer la sécurité dans le repo on ajoue sur les champs  [
                 'distinct' => true,
                 'sortFieldAllowList' => ['r.id', 'r.title']
             ]
+
+**************************************************************************
+
+Utiliser l'Asset Mapper (JS & CSS)
+A NE PAS FAIRE *************
+On compil : 
+php bin/console asset-map:compile
+Le dossier assets et son contenu vont être copier dans le fichier public
+Le css et le js vont être importé depuis le base.html.twig 
+
+{% block stylesheets %}{% endblock %}
+
+		{% block javascripts %}
+			{% block importmap %}
+				{{ importmap('app') }}
+			{% endblock %}
+		{% endblock %}
+A NE PAS FAIRE *************
+Cependant c'est embetant de faire un compil pour chaque changement de js (car on est en production et non en développement)
+On ferme le php/bin et on va faire un :
+On fait un symfony:serve
+Du coup on va plus vraiment compiler on va directement travailler adns le ossier asset. On va créer un ficher images dans asset et on va insérer une image en background à l'aide de 
+body {
+    background: url(../images/lala.jpg) no-repeat center center / cover;
+}
+On verra que l'image va bien s'afficher a partir de ce dossier
+
+Avec asset mapper on va importer les confetti de canvas lorsqu'on arrive sur la page :
+
+on fait la commande :
+
+php bin/console importmap:require canvas-confetti
+Dans le app.js on peut importer ce package.
+
+import canvasConfetti from 'canvas-confetti'
+
+document.body.addEventListener('click',  () => {
+    canvasConfetti()
+})
+Lorsqu'on va faire une action un click les confetti vont proc
+
+Si on veut récupérer une image depuis le folder image et l'utiliser dans le twig on va faire :
+
+		<img src="{{ asset('images/lala.jpg') }}" width="100px">
