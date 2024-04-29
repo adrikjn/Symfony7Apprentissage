@@ -571,3 +571,156 @@ Lorsqu'on va faire une action un click les confetti vont proc
 Si on veut récupérer une image depuis le folder image et l'utiliser dans le twig on va faire :
 
 		<img src="{{ asset('images/lala.jpg') }}" width="100px">
+
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED CREATION API 3 CHAPITRE 3 VIDEOS A VOIR PLUS TARD 
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED CREATION FIXTURE 1 VIDEO A VOIR PLUS TARD 
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED PERMISSION AVEC VOTER  1 VIDEO A VOIR PLUS TARD 
+
+*****************************************************************************************************************************************************************************
+
+SKIPPED LES EVENEMENTS  1 VIDEO A VOIR PLUS TARD 
+
+*****************************************************************************************************************************************************************************
+
+SYMFONY UX :
+Proposé un ensemble de composant pour rêgler des problèmes dans un projet symfony côté front.
+ux.symfony.com
+
+1 : Turbo 
+
+Commande : 
+composer require symfony/ux-turbo
+Le turboframe permet par exemple de rendre un formulaire dynamique au lieu d'afficher une nouvelle page le formulaire va s'afficher en dessous (dynamisme)
+on a juste entouré de ce qu'on veut frame (le chemin) puis sur la nouvelle page ce qu'on veut dynamisé (le formulaire)
+sur l'index : 
+<turbo-frame id="recipe_{{recipe.id}}">
+					<a href="{{ path('admin.recipe.edit', {id: recipe.id})}}">{{ recipe.title }}</a>
+				</turbo-frame>
+sur le edit formulaire : 
+<turbo-frame id="recipe_{{recipe.id}}">
+				
+    {{form_start(form, {action: path('admin.recipe.edit', {id: recipe.id})})}}
+        <div>
+            {{form_row(form.title)}}
+            {{form_row(form.slug)}}
+            {{form_row(form.category)}}
+            {{form_row(form.duration)}}
+            {{form_row(form.content)}}
+            {{form_row(form.thumbnailFile)}}
+            <button type="submit" class="btn btn-primary">Modifier Recette</button>
+        </div>
+    {{form_end(form)}}
+</turbo-frame>
+
+Afin de rendre le delete plus dynamique et non paraitre un refresh de page lorsqu'on delete un élément.
+
+On va dans le reicpe controller on modifie la requête comme ceci :
+ #[Route('/{id}', name: 'delete', methods:['DELETE'], requirements:['id' => Requirement::DIGITS])]
+   public function remove(Recipe $recipe, EntityManagerInterface $em, Request $request){
+      $recipeId = $recipe->getId();
+      $em->remove($recipe);
+      $em->flush();
+      if($request->getPreferredFormat() === TurboBundle::STREAM_FORMAT){
+         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+         return $this->render('admin/recipe/delete.html.twig', ['recipeId' => $recipeId]);
+      }
+      $this->addFlash('success', 'La recette a bien été supprimée');
+      return $this->redirectToRoute('admin.recipe.index');
+   }
+
+   On créer le fichier twig inscrit dans le render
+   On met juse ceci sur le delete twig : 
+   <turbo-stream action="remove" target="row_recipe_{{recipeId}}"></turbo-stream>
+   Dans le index.html.twig de la recette dans le 1er tr au niveau de la boucle on ajoute ceci 
+		<tr id="row_recipe_{{ recipe.id }}">
+Et voila le delete est automatique, il n'y'a pas de refresh de page.
+
+Afficher le message delete automatique en même temps :
+On ajoute dans le index l'affichage : 
+
+<div class="flash">
+	
+</div> 
+dans le delete on met l'action et le type d'erreur
+<turbo-stream action="append" target="flash">
+    <template> 
+        <div class="alert alert-success">{{message}}</div>
+    </template>
+</turbo-stream>
+
+Dans le controller on envoie la variable 
+
+ #[Route('/{id}', name: 'delete', methods:['DELETE'], requirements:['id' => Requirement::DIGITS])]
+   public function remove(Recipe $recipe, EntityManagerInterface $em, Request $request){
+      $recipeId = $recipe->getId();
+      $message ='La recette a bien été supprimée';
+      $em->remove($recipe);
+      $em->flush();
+      if($request->getPreferredFormat() === TurboBundle::STREAM_FORMAT){
+         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+         return $this->render('admin/recipe/delete.html.twig', ['recipeId' => $recipeId, 'message' => $message]);
+      }
+      $this->addFlash('success', $message);
+      return $this->redirectToRout
+
+(pas marché)
+
+Passons a autocomplete :
+
+composer require symfony/ux-autocomplete
+Aller dans mon entity type et ajouter : 
+ ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => 'name',
+                'autocomplete' => true
+            ])
+(autocomplete true)
+
+Dans le controller json on doit mettre false sur l'autre et true sur celui de bootstrap 5
+    "controllers": {
+        "@symfony/ux-autocomplete": {
+            "autocomplete": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "tom-select/dist/css/tom-select.default.css": false,
+                    "tom-select/dist/css/tom-select.bootstrap4.css": false,
+                    "tom-select/dist/css/tom-select.bootstrap5.css": true
+                }
+            }
+        },
+Et on peut faire cette commande : 
+php bin/console importmap:require tom-select/dist/css/tom-select.bootstrap5.css
+
+Améliorer le système en AJAX :
+Commande : 
+php bin/console make:autocomplete-field
+Quel entité : Category
+Entré
+
+On va juste metre ceci 
+            ->add('category', CategoryAutocompleteField::class)
+Dans le categoryAutocomplete field
+on va faire comme ceci :
+  'class' => Category::class,
+            'placeholder' => 'Choose a Category',
+            'choice_label' => 'name',
+            'query_builder' => function (CategoryRepository $categoryRepository) {
+                return $categoryRepository->createQueryBuilder('category');
+            }
+Le 1er et tout autant viable si il y'a peu de catégorie.
+
+
+Passons au package pour cacher le password ou l'afficher sans js :
+composer require symfony/ux-toggle-password
+Il y'a juste a ajouter : 
+'toggle' => true, dans le registrationformtype en dessous de mapped false

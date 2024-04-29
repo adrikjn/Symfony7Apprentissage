@@ -1,10 +1,10 @@
 import './bootstrap.js';
 
-import canvasConfetti from 'canvas-confetti'
+// import canvasConfetti from 'canvas-confetti'
 
-document.body.addEventListener('click',  () => {
-    canvasConfetti()
-})
+// document.body.addEventListener('click',  () => {
+//     canvasConfetti()
+// })
 
 /*
  * Welcome to your app's main JavaScript file!

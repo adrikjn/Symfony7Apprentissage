@@ -9,8 +9,9 @@
     {# <p>
         <img src="/recettes/images/{{recipe.thumbnail}}" alt="">
     </p> #}
-
-    {{form_start(form)}}
+<turbo-frame id="recipe_{{recipe.id}}">
+				
+    {{form_start(form, {action: path('admin.recipe.edit', {id: recipe.id})})}}
         <div>
             {{form_row(form.title)}}
             {{form_row(form.slug)}}
@@ -21,4 +22,6 @@
             <button type="submit" class="btn btn-primary">Modifier Recette</button>
         </div>
     {{form_end(form)}}
+</turbo-frame>
+
 {% endblock %}
